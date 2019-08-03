@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# This script comes from the prepare-commit-msg.sample in recent git distributions.
+# It appends the output of "git diff --name-status -r"
+# into the message, just before the "git status" output.  It is
+# commented because it doesn't cope well with --amend or with squashed commits.
+
+# shellcheck source=/usr/local/Cellar/git/2.15.1/libexec/git-core/git-sh-setup
+. "$(git --exec-path)/git-sh-setup"
+
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+SHA1=$3
+
+case "$COMMIT_SOURCE,$SHA1" in
+, | template,)
+  /usr/bin/perl -i.bak -pe '
+       print "\n" . `git diff --cached --name-status -r`
+ 	 if /^#/ && $first++ == 0' "$COMMIT_MSG_FILE"
+  ;;
+*) ;;
+esac

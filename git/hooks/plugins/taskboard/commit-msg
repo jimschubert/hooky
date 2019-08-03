@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+#
+# Automatically adds branch name and branch description to every commit message.
+# Modified from the stackoverflow answer here: http://stackoverflow.com/a/11524807/151445
+
+# shellcheck source=/usr/local/Cellar/git/2.15.1/libexec/git-core/git-sh-setup
+. "$(git --exec-path)/git-sh-setup"
+
+# Succeed on all merge messages, as evidenced by MERGE_MSG existing
+[ -f "$GIT_DIR"/MERGE_MSG ] && exit 0
+
+if [ -f "$GIT_DIR"/hooks/plugins/common.sh ]; then
+  # shellcheck disable=SC1090
+  . "$GIT_DIR"/hooks/plugins/common.sh
+fi
+
+# Get branch name and description
+# shellcheck disable=SC2063
+name=$(git branch | grep '*' | sed 's/* //')
+
+# If we're on master, don't append
+[ "$name" = "master" ] && exit 0
+
+# Don't apply this logic if we are in a 'detached head' state (rebasing, read-only history, etc)
+if [ "$name" != "(no branch)" ]; then
+  # The prefix for a taskboard e.g. SPARK-1234, hooky.taskboard.prefix will be SPARK-
+  taskboard=$(git config --get hooky.taskboard.prefix)
+
+  if [ -n "$taskboard" ]; then
+
+    # The url template is everything UP TO the issue's digits.
+    # For SPARK-1234, url template will be https://issues.apache.org/jira/browse/SPARK-
+
+    urltemplate=$(git config --get hooky.taskboard.urltemplate)
+    proj="$(echo "${taskboard}" | tr -d '-' | tr '[:lower:]' '[:upper:]')[-]?[//]?([0-9]*)$"
+    if [[ "$name" =~ $proj ]]; then
+      url="${urltemplate}$(echo "$name" | sed -E "s/$proj/\\1/g")"
+    fi
+
+    # Avoid writing this out multiple time, e.g. in the case of git commit --amend
+    if ! grep -q "$url" <"$1"; then
+      # Append url to COMMIT_MSG, adding an additional "empty line" if single-line commit message.
+      if [ "$(tr -s '\n' <"$1" | grep -c "^[^#]")" -lt "2" ]; then
+        printf '\n\n' >>"$1"
+      fi
+      # For info on parameters to githooks, run: man githooks
+      printf '\n%s\n' "$url" >>"$1"
+
+      d "$PLUGIN:\n\tTASKBOARD=${taskboard}\n\tURLTEMPLATE=${urltemplate}\n"
+    else
+      d "$PLUGIN: url exists"
+    fi
+  else
+    d "$PLUGIN: no git config entry for hooky.taskboard.prefix"
+  fi
+fi
+d "$PLUGIN: exiting"

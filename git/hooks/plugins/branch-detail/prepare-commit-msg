@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+#
+# Adds branch metadata to a commit message.
+# This always adds the branch name, and if set it also adds a branch description.
+
+# shellcheck source=/usr/local/Cellar/git/2.15.1/libexec/git-core/git-sh-setup
+. "$(git --exec-path)/git-sh-setup"
+
+# If MERGE_MSG exists, we're in a merge commit so changes aren't from "our branch".
+[ -f "$GIT_DIR"/MERGE_MSG ] && exit 0
+
+if [ -f "$GIT_DIR"/hooks/plugins/common.sh ]; then
+  # shellcheck disable=SC1090
+  . "$GIT_DIR"/hooks/plugins/common.sh
+fi
+
+# shellcheck disable=SC2063
+name=$(git branch | grep '*' | sed 's/* //')
+description=$(git config branch."$name".description)
+
+d "$PLUGIN: name: $name, description: $description"
+# Don't apply this logic if we are in a 'detached head' state (rebasing, read-only history, etc)
+if [ "$name" != "(no branch)" ]; then
+  if ! grep -q "$name" "$1"; then
+    # if commit is a single line with no separating blank line, insert the blank line.
+    if [ "$(tr -s '\n' <"$1" | grep -c "^[^#]")" -lt "2" ]; then
+      printf '\n\n' >>"$1"
+    fi
+    # Append branch name and optional description (if defined) to COMMIT_MSG
+    printf ':%s' "$name" >>"$1"
+    if [ -n "$description" ]; then
+      printf ' %s' "$description" >>"$1"
+    fi
+    printf '\n' >>"$1"
+  fi
+fi
+d "$PLUGIN: exiting"

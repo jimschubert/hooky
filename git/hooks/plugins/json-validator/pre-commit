@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+#
+# An example hook script to verify what is about to be committed.
+# Called by "git commit" with no arguments.  The hook should
+# exit with non-zero status after issuing an appropriate message if
+# it wants to stop the commit.
+
+# shellcheck source=/usr/local/Cellar/git/2.15.1/libexec/git-core/git-sh-setup
+. "$(git --exec-path)/git-sh-setup"
+
+if [ -f "$GIT_DIR"/hooks/plugins/common.sh ]; then
+  # shellcheck disable=SC1090
+  . "$GIT_DIR"/hooks/plugins/common.sh
+fi
+
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+  against=HEAD
+else
+  # Initial commit: diff against an empty tree object
+  against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
+
+declare -a errs
+
+# Redirect output to stderr.
+exec 1>&2
+
+json_validator=$(git config --get hooky.json-validator.command)
+json_validator=${json_validator:-"python -m json.tool"}
+d "$PLUGIN: Using command $json_validator"
+
+for modified in $(git diff --cached --name-only --diff-filter=AM $against | grep '.json$' ) ; do
+    eval "$json_validator $modified >/dev/null" 2>/dev/null
+    status=$?
+    if [[ $status != 0 ]]; then
+      d "$PLUGIN: Invalid JSON file: $modified"
+      if [[ ${#errs[@]} -eq 0 ]]; then
+        errs=("$modified")
+      else
+        errs=("${errs[@]}" "$modified")
+      fi
+    fi
+done
+
+if [ ${#errs[@]} -gt 0 ]; then
+    d "$PLUGIN: Found JSON syntax errors."
+    echo -e "$PLUGIN (hooky): There were JSON syntax errors:\n" >&2
+    for e in "${errs[@]}" ; do
+      echo -e "\t$e" >&2
+    done
+    echo -e "\n   If you think this is incorrect, you may skip validation with:\n" >&2
+    echo -e "\tgit commit --no-verify"
+    exit 1
+fi
+d "$PLUGIN: exiting"
