@@ -104,6 +104,10 @@ Evaluates a branch name for common taskboard patterns, and appends a link to the
 |`hooky.taskboard.urltemplate`
 |Provides the non-digit part of a URL to your branch's related task item.
 |N/A
+
+|`hooky.taskboard.separator`
+|Defines the separator used between the board prefix and digits, e.g. `prefix`-`digits` or `prefix`/`digits`.
+|`-`
 |===
 
 == Contributing
