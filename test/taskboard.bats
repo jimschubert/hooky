@@ -94,7 +94,7 @@ configure_taskboard_github() {
 }
 
 @test "taskboard: sets prefix and url for github style branches (uppercase branch names)" {
-  
+
   configure_taskboard_github
 
   run git config --list

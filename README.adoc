@@ -2,9 +2,24 @@
 :author: Jim Schubert
 :email: james.schubert@gmail.com
 
+Tired of modifying hooks within your repository to do one or more things? Tired of making the same change across project repositories?
+
+> Hooky allows you to apply the logic from multiple hook plugins using git's configuration.
+
+For instance, consider if you have some repositories in which you want a branch name and description included in each commit.
+Business decisions require a file changelog in every commit, but only in a handful of repositories. Suppose you already have
+a `prepare-commit-msg` hook and `commit-msg` hook in those repositories. You'd need to decide which of these hooks to modify,
+and you now have hooks with differing logic across repositories.
+
+With hooky, you may configure multiple repositories with the `branch-detail` and `taskboard` plugins, and in only the few
+repositories which require file changes in the commit message you may enable the `changes` plugin.
+
 == Setup
 
-Clone this repository to a shared location. `~/.config/hooky` is the recommended location.
+Clone this repository to a shared location. `~/.config/hooky` is the recommended location. For other options, see
+https://git-scm.com/docs/git-init#_template_directory[git-init template directory].
+
+IMPORTANT: Always manually inspect the scripts in script-executing frameworks such as hooky before applying them.
 
 [source,bash]
 ----
@@ -98,6 +113,27 @@ Evaluates a branch name for common taskboard patterns, and appends a link to the
 == Testing
 
 Tests are written with bats. Please follow bats-core https://github.com/bats-core/bats-core[installation instructions] before running tests.
+
+== Extending
+
+Hooky can be used as a starter point for your plugin infrastructure a well. Just clone this repo, and add your plugins under
+`git/hooks/plugins/PLUGIN_NAME`. A plugin may have one or more git hooks defined; create the hook (e.g. `prepare-commit-msg`, `commit-msg`, or both),
+and make sure these hooks are executable.
+
+Hooky will traverse all plugins defined in the git config element `hooky.plugins`, and execute these according to which top-level hook
+has invoked the `hooky` function (see `git/hooks/pre-commit`, for instance). If hooky doesn't include the top-level hook, just add it and invoke the hooky function.
+For example, to enable `pre-push` hooks in your fork, in `git/hooks/pre-push`, add this minimal script:
+
+[source,bash]
+----
+#!/bin/sh
+
+. "$GIT_DIR/hooks/hooky.sh"
+hooky "pre-push" "$@"
+----
+
+Ensure that the new `pre-push` file is executable. Now, git will invoke `pre-push` and your pre-push hook will invoke hooky,
+which in turn invokes all `pre-push` hooks for any enabled plugin which defines it.
 
 == License
 
