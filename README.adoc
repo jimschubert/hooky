@@ -1,0 +1,104 @@
+= Hooky: Plugin based git hooks
+:author: Jim Schubert
+:email: james.schubert@gmail.com
+
+== Setup
+
+Clone this repository to a shared location. `~/.config/hooky` is the recommended location.
+
+[source,bash]
+----
+mkdir ~/.config
+git clone https://github.com/jimschubert/hooky.git ~/.config/hooky
+----
+
+Then, configure git to use hooky as your git template directory:
+
+[source,bash]
+----
+git config --global init.templatedir '~/.config/hooky/git/'
+----
+
+== Usage
+
+Add one of the supported plugins to the `hooky.plugins` config key. This is a multi-valued key.
+
+For example, add `json-validator` and `changes`:
+
+[source,bash]
+----
+git config --add hooky.plugins json-validator
+git config --add hooky.plugins changes
+----
+
+Remove a plugin individually:
+
+[source,bash]
+----
+git config --unset hooky.plugins changes
+----
+
+Or uninstall hooky from a repo completely:
+
+[source,bash]
+----
+git config --unset-all hooky.plugins
+----
+
+== Plugins
+
+=== branch-detail
+
+Print out the branch name and its description (if present) to each commit message.
+
+==== Configs
+
+* `branch.BRANCH_NAME.description`
+** Common git configuration option, allows you to configure a description for a git branch. To set, `git branch --edit-description`.
+
+=== changes
+
+One of git's built-in examples, this appends diff details to the commit message (uncommented).
+
+=== json-validator
+
+Verifies that any `.json` file being added or modified represents a valid JSON syntax. By default, this passes each modified JSON file through `python -M json.tool`.
+
+==== Options
+
+|===
+|Key |Description |Default
+
+|`hooky.json-validator.command`
+|Defines the json common to invoke. Individual JSON files are passed as an argument following this command.
+|`python -m json.tool`
+|===
+
+
+=== taskboard
+
+Evaluates a branch name for common taskboard patterns, and appends a link to the taskboard location in a commit message.
+
+|===
+|Key |Description |Default
+
+|`hooky.taskboard.prefix`
+|Defines the prefix used to determine if a branch is in a taskboard format. Evaluation becomes the format `prefix`-`digits`.
+|N/A
+
+|`hooky.taskboard.urltemplate`
+|Provides the non-digit part of a URL to your branch's related task item.
+|N/A
+|===
+
+== Contributing
+
+// TODO
+
+== Testing
+
+Tests are written with bats. Please follow bats-core https://github.com/bats-core/bats-core[installation instructions] before running tests.
+
+== License
+
+link:./LICENSE[Apache 2.0]
