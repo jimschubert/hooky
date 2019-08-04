@@ -1,0 +1,4 @@
+hooky.plugins=taskboard
+hooky.taskboard.prefix=pr
+hooky.taskboard.separator=/
+hooky.taskboard.urltemplate=https://github.com/jimschubert/hooky/pull/

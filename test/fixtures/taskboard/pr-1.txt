@@ -1,0 +1,3 @@
+github style
+
+https://github.com/jimschubert/hooky/pull/1

@@ -14,6 +14,8 @@ if [ -f "$GIT_DIR"/hooks/plugins/common.sh ]; then
   . "$GIT_DIR"/hooks/plugins/common.sh
 fi
 
+shopt -s nocasematch
+
 # Get branch name and description
 # shellcheck disable=SC2063
 name=$(git branch | grep '*' | sed 's/* //')
@@ -32,21 +34,26 @@ if [ "$name" != "(no branch)" ]; then
     # For SPARK-1234, url template will be https://issues.apache.org/jira/browse/SPARK-
 
     urltemplate=$(git config --get hooky.taskboard.urltemplate)
-    proj="$(echo "${taskboard}" | tr -d '-' | tr '[:lower:]' '[:upper:]')[-]?[//]?([0-9]*)$"
-    if [[ "$name" =~ $proj ]]; then
-      url="${urltemplate}$(echo "$name" | sed -E "s/$proj/\\1/g")"
+    separator=$(git config --get hooky.taskboard.separator)
+    separator=${separator:-"-"}
+    proj="$(echo "${taskboard}" | tr '[:upper:]' '[:lower:]' )[${separator}]?([0-9]*)$"
+    # proj="${taskboard}[-]?[//]?([0-9]*)$"
+     if [[ "$name" =~ $proj ]]; then
+        # shellcheck disable=SC2086
+        url=${urltemplate}$(echo "$name" | cut -d${separator} -f2)
     fi
 
+    d "$PLUGIN:\n\tTASKBOARD=${taskboard}\n\tURLTEMPLATE=${urltemplate}\n\tproj=${proj}\n\turl=${url}\n"
+
     # Avoid writing this out multiple time, e.g. in the case of git commit --amend
-    if ! grep -q "$url" <"$1"; then
+    # shellcheck disable=SC2143
+    if [ -z "$(cat "$1" | grep "$url")" ]; then
       # Append url to COMMIT_MSG, adding an additional "empty line" if single-line commit message.
       if [ "$(tr -s '\n' <"$1" | grep -c "^[^#]")" -lt "2" ]; then
         printf '\n\n' >>"$1"
       fi
       # For info on parameters to githooks, run: man githooks
       printf '\n%s\n' "$url" >>"$1"
-
-      d "$PLUGIN:\n\tTASKBOARD=${taskboard}\n\tURLTEMPLATE=${urltemplate}\n"
     else
       d "$PLUGIN: url exists"
     fi

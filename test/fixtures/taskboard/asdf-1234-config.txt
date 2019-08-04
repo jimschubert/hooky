@@ -1,0 +1,3 @@
+hooky.plugins=taskboard
+hooky.taskboard.prefix=asdf
+hooky.taskboard.urltemplate=http://example.com/asdf-
