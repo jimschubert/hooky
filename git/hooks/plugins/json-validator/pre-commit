@@ -28,11 +28,21 @@ exec 1>&2
 
 json_validator=$(git config --get hooky.json-validator.command)
 json_validator=${json_validator:-"python -m json.tool"}
+defer_empty=$(git config --get hooky.json-validator.defer-empty)
+defer_empty=${defer_empty:-false}
 d "$PLUGIN: Using command $json_validator"
 
 for modified in $(git diff --cached --name-only --diff-filter=AM $against | grep '.json$' ) ; do
-    eval "$json_validator $modified >/dev/null" 2>/dev/null
-    status=$?
+    # A completely empty object is invalid according to JSON spec, but this may be too rigid.
+    # If the file is size 0 and we're not defering to the tool's logic, conider this an invalid file.
+    if [ ! -s "$modified" ] && [ "false" = "$defer_empty" ]; then
+      status=1
+    else
+      eval "$json_validator $modified >/dev/null" 2>/dev/null
+      status=$?
+    fi
+
+
     if [[ $status != 0 ]]; then
       d "$PLUGIN: Invalid JSON file: $modified"
       if [[ ${#errs[@]} -eq 0 ]]; then

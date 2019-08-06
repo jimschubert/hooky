@@ -87,12 +87,18 @@ Verifies that any `.json` file being added or modified represents a valid JSON s
 |`hooky.json-validator.command`
 |Defines the json common to invoke. Individual JSON files are passed as an argument following this command.
 |`python -m json.tool`
+
+|`hooky.json-validator.defer-empty`
+|Whether or not we all the command defined above to decide if a completely empty JSON file is valid. If set to false, an empty file is considered invalid JSON, which matches behavior of the default command, `python -m json.tool` and the JSON specification.
+|`false`
 |===
 
 
 === taskboard
 
 Evaluates a branch name for common taskboard patterns, and appends a link to the taskboard location in a commit message.
+
+==== Options
 
 |===
 |Key |Description |Default

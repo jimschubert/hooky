@@ -1,0 +1,3 @@
+If you think this is incorrect, you may skip validation with:
+
+	git commit --no-verify
