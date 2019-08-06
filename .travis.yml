@@ -5,8 +5,10 @@ addons:
   apt:
     update: true
     packages:
-    - jq
-    - python-minimal
+      - jq
+      - curl
+      - unzip
+      - python-minimal
 
 env:
   global:
@@ -19,9 +21,9 @@ before_install:
       pushd "${batstmp}"
       curl -sSLO https://github.com/bats-core/bats-core/archive/master.zip
       unzip -qo master.zip
-      sudo bash "${batstmp}"/bats-core-master/install.sh /usr/local
+      bash "${batstmp}"/bats-core-master/install.sh /usr/local
       popd
     fi
 
 script:
-  - bats test/
+  - /usr/local/bin/bats test/

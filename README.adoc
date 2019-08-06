@@ -138,8 +138,8 @@ For example, to enable `pre-push` hooks in your fork, in `git/hooks/pre-push`, a
 
 [source,bash]
 ----
-#!/bin/sh
-
+#!/usr/bin/env bash
+. "$(git --exec-path)/git-sh-setup"
 . "$GIT_DIR/hooks/hooky.sh"
 hooky "pre-push" "$@"
 ----
