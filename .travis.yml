@@ -1,8 +1,12 @@
 sudo: false
 language: bash
+
+python:
+  - "2.7"
+
 before_install:
   - sudo add-apt-repository ppa:duggan/bats --yes
   - sudo apt-get update -qq
-  - sudo apt-get install -qq bats
+  - sudo apt-get install -qq bats jq
 script:
   - bats test/

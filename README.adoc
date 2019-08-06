@@ -2,6 +2,8 @@
 :author: Jim Schubert
 :email: james.schubert@gmail.com
 
+image:https://travis-ci.com/jimschubert/hooky.svg?branch=master["Build Status", link="https://travis-ci.com/jimschubert/hooky"]
+
 Tired of modifying hooks within your repository to do one or more things? Tired of making the same change across project repositories?
 
 > Hooky allows you to apply the logic from multiple hook plugins using git's configuration.
