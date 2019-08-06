@@ -1,12 +1,27 @@
 sudo: false
 language: bash
+dist: xenial
+addons:
+  apt:
+    update: true
+    packages:
+    - jq
+    - python-minimal
 
-python:
-  - "2.7"
+env:
+  global:
+    - export PATH="/usr/local/bin:$PATH"
 
 before_install:
-  - sudo add-apt-repository ppa:duggan/bats --yes
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq bats jq
+  - |
+    if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+      batstmp="$( mktemp -d -p /tmp bats-core.XXXXX)"
+      pushd "${batstmp}"
+      curl -sSLO https://github.com/bats-core/bats-core/archive/master.zip
+      unzip -qo master.zip
+      sudo bash "${batstmp}"/bats-core-master/install.sh /usr/local
+      popd
+    fi
+
 script:
   - bats test/
