@@ -6,7 +6,7 @@
 # commented because it doesn't cope well with --amend or with squashed commits.
 
 # shellcheck source=/usr/local/Cellar/git/2.15.1/libexec/git-core/git-sh-setup
-. "$(git --exec-path)/git-sh-setup"
+[ "$(type -t git_dir_init)" = "function" ] ||  . "$(git --exec-path)/git-sh-setup"
 
 COMMIT_MSG_FILE=$1
 COMMIT_SOURCE=$2

@@ -6,7 +6,7 @@
 # it wants to stop the commit.
 
 # shellcheck source=/usr/local/Cellar/git/2.15.1/libexec/git-core/git-sh-setup
-. "$(git --exec-path)/git-sh-setup"
+[ "$(type -t git_dir_init)" = "function" ] ||  . "$(git --exec-path)/git-sh-setup"
 
 if [ -f "$GIT_DIR"/hooks/plugins/common.sh ]; then
   # shellcheck disable=SC1090

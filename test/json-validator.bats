@@ -4,12 +4,12 @@ load common
 fixtures json-validator
 
 configure_json_validator_standard() {
-  run git config --add hooky.plugins json-validator
+  git config --add hooky.plugins json-validator
 }
 
 configure_json_validator_jq() {
-  run git config --add hooky.plugins json-validator
-  run git config hooky.json-validator.command 'jq -e "."'
+  git config --add hooky.plugins json-validator
+  git config hooky.json-validator.command 'jq -e "."'
 }
 
 @test "json-validator: exists" {
@@ -23,10 +23,14 @@ configure_json_validator_jq() {
 
 @test "json-validator: aborts commit for invalid chars in file (standard validator)" {
   configure_json_validator_standard
-  run cp "$FIXTURE_ROOT/invalid-chars.json" "$TMP"
-  run git add invalid-chars.json
+
+  cp "$FIXTURE_ROOT/invalid-chars.json" "$TMP"
+  git add invalid-chars.json
+
   run git commit -m 'invalid-char.json'
+
   assert_failure
+
   assert_output -p < "$FIXTURE_ROOT/header.txt"
   assert_output -p 'invalid-chars.json'
   assert_output -p < "$FIXTURE_ROOT/footer.txt"
@@ -34,11 +38,15 @@ configure_json_validator_jq() {
 
 @test "json-validator: aborts commit for invalid chars in file in subdirectory (standard validator)" {
   configure_json_validator_standard
-  run mkdir -p "$TMP/a/b/c"
-  run cp "$FIXTURE_ROOT/invalid-chars.json" "$TMP"/a/b/c
-  run git add a/b/c/invalid-chars.json
+
+  mkdir -p "$TMP/a/b/c"
+  cp "$FIXTURE_ROOT/invalid-chars.json" "$TMP"/a/b/c
+  git add a/b/c/invalid-chars.json
+
   run git commit -m 'invalid-char.json'
+
   assert_failure
+
   assert_output -p < "$FIXTURE_ROOT/header.txt"
   assert_output -p 'a/b/c/invalid-chars.json'
   assert_output -p < "$FIXTURE_ROOT/footer.txt"
@@ -46,10 +54,14 @@ configure_json_validator_jq() {
 
 @test "json-validator: aborts commit for empty json (standard validator)" {
   configure_json_validator_standard
-  run cp "$FIXTURE_ROOT/empty-file.json" "$TMP"
-  run git add empty-file.json
+
+  cp "$FIXTURE_ROOT/empty-file.json" "$TMP"
+  git add empty-file.json
+
   run git commit -m 'empty-file.json'
+
   assert_failure
+
   assert_output -p < "$FIXTURE_ROOT/header.txt"
   assert_output -p 'empty-file.json'
   assert_output -p < "$FIXTURE_ROOT/footer.txt"
@@ -57,10 +69,14 @@ configure_json_validator_jq() {
 
 @test "json-validator: aborts commit for invalid obj in file (standard validator)" {
   configure_json_validator_standard
-  run cp "$FIXTURE_ROOT/invalid-obj.json" "$TMP"
-  run git add invalid-obj.json
+
+  cp "$FIXTURE_ROOT/invalid-obj.json" "$TMP"
+  git add invalid-obj.json
+
   run git commit -m 'invalid-obj.json'
+
   assert_failure
+
   assert_output -p < "$FIXTURE_ROOT/header.txt"
   assert_output -p 'invalid-obj.json'
   assert_output -p < "$FIXTURE_ROOT/footer.txt"
@@ -68,11 +84,15 @@ configure_json_validator_jq() {
 
 @test "json-validator: aborts commit for invalid obj in file in subdirectory (standard validator)" {
   configure_json_validator_standard
-  run mkdir -p "$TMP/a/b/c"
-  run cp "$FIXTURE_ROOT/invalid-obj.json" "$TMP"/a/b/c
-  run git add a/b/c/invalid-obj.json
+
+  mkdir -p "$TMP/a/b/c"
+  cp "$FIXTURE_ROOT/invalid-obj.json" "$TMP"/a/b/c
+  git add a/b/c/invalid-obj.json
+
   run git commit -m 'invalid-obj.json'
+
   assert_failure
+
   assert_output -p < "$FIXTURE_ROOT/header.txt"
   assert_output -p 'a/b/c/invalid-obj.json'
   assert_output -p < "$FIXTURE_ROOT/footer.txt"
@@ -80,11 +100,15 @@ configure_json_validator_jq() {
 
 @test "json-validator: aborts commit for empty json in subdirectory (standard validator)" {
   configure_json_validator_standard
-  run mkdir -p "$TMP/a/b/c"
-  run cp "$FIXTURE_ROOT/empty-file.json" "$TMP"/a/b/c
-  run git add a/b/c/empty-file.json
+
+  mkdir -p "$TMP/a/b/c"
+  cp "$FIXTURE_ROOT/empty-file.json" "$TMP"/a/b/c
+  git add a/b/c/empty-file.json
+
   run git commit -m 'empty-file.json'
+
   assert_failure
+
   assert_output -p < "$FIXTURE_ROOT/header.txt"
   assert_output -p 'a/b/c/empty-file.json'
   assert_output -p < "$FIXTURE_ROOT/footer.txt"
@@ -92,35 +116,47 @@ configure_json_validator_jq() {
 
 @test "json-validator: succeed for empty object (standard validator)" {
   configure_json_validator_standard
-  run cp "$FIXTURE_ROOT/empty-object.json" "$TMP"
-  run git add empty-object.json
+
+  cp "$FIXTURE_ROOT/empty-object.json" "$TMP"
+  git add empty-object.json
+
   run git commit -m 'empty-object.json'
+
   assert_success
 }
 
 @test "json-validator: succeed for empty object in subdirectory (standard validator)" {
   configure_json_validator_standard
-  run mkdir -p "$TMP/a/b/c"
-  run cp "$FIXTURE_ROOT/empty-object.json" "$TMP"/a/b/c
-  run git add a/b/c/empty-object.json
+
+  mkdir -p "$TMP/a/b/c"
+  cp "$FIXTURE_ROOT/empty-object.json" "$TMP"/a/b/c
+  git add a/b/c/empty-object.json
+
   run git commit -m 'empty-object.json'
+
   assert_success
 }
 
 @test "json-validator: succeed for valid object (standard validator)" {
   configure_json_validator_standard
-  run cp "$FIXTURE_ROOT/valid.json" "$TMP"
-  run git add valid.json
+
+  cp "$FIXTURE_ROOT/valid.json" "$TMP"
+  git add valid.json
+
   run git commit -m 'valid.json'
+
   assert_success
 }
 
 @test "json-validator: succeed for valid object in subdirectory (standard validator)" {
   configure_json_validator_standard
-  run mkdir -p "$TMP/a/b/c"
-  run cp "$FIXTURE_ROOT/valid.json" "$TMP"/a/b/c
-  run git add a/b/c/valid.json
+
+  mkdir -p "$TMP/a/b/c"
+  cp "$FIXTURE_ROOT/valid.json" "$TMP"/a/b/c
+  git add a/b/c/valid.json
+
   run git commit -m 'valid.json'
+
   assert_success
 }
 
@@ -130,10 +166,14 @@ configure_json_validator_jq() {
 
 @test "json-validator: aborts commit for invalid chars in file (jq validator)" {
   configure_json_validator_jq
-  run cp "$FIXTURE_ROOT/invalid-chars.json" "$TMP"
-  run git add invalid-chars.json
+
+  cp "$FIXTURE_ROOT/invalid-chars.json" "$TMP"
+  git add invalid-chars.json
+
   run git commit -m 'invalid-char.json'
+
   assert_failure
+
   assert_output -p < "$FIXTURE_ROOT/header.txt"
   assert_output -p 'invalid-chars.json'
   assert_output -p < "$FIXTURE_ROOT/footer.txt"
@@ -141,11 +181,15 @@ configure_json_validator_jq() {
 
 @test "json-validator: aborts commit for invalid chars in file in subdirectory (jq validator)" {
   configure_json_validator_jq
-  run mkdir -p "$TMP/a/b/c"
-  run cp "$FIXTURE_ROOT/invalid-chars.json" "$TMP"/a/b/c
-  run git add a/b/c/invalid-chars.json
+
+  mkdir -p "$TMP/a/b/c"
+  cp "$FIXTURE_ROOT/invalid-chars.json" "$TMP"/a/b/c
+  git add a/b/c/invalid-chars.json
+
   run git commit -m 'invalid-char.json'
+
   assert_failure
+
   assert_output -p < "$FIXTURE_ROOT/header.txt"
   assert_output -p 'a/b/c/invalid-chars.json'
   assert_output -p < "$FIXTURE_ROOT/footer.txt"
@@ -155,10 +199,14 @@ configure_json_validator_jq() {
 # A value can be a string in double quotes, or a number, or true or false or null, or an object or an array. These structures can be nested.
 @test "json-validator: aborts commit for empty json (jq validator)" {
   configure_json_validator_jq
-  run cp "$FIXTURE_ROOT/empty-file.json" "$TMP"
-  run git add empty-file.json
+
+  cp "$FIXTURE_ROOT/empty-file.json" "$TMP"
+  git add empty-file.json
+
   run git commit -m 'empty-file.json'
+
   assert_failure
+
   assert_output -p < "$FIXTURE_ROOT/header.txt"
   assert_output -p 'empty-file.json'
   assert_output -p < "$FIXTURE_ROOT/footer.txt"
@@ -166,20 +214,26 @@ configure_json_validator_jq() {
 
 @test "json-validator: succeeds for empty json with defer-empty=true (jq validator)" {
   configure_json_validator_jq
-  run git config hooky.json-validator.defer-empty true
-  run cp "$FIXTURE_ROOT/empty-file.json" "$TMP"
-  run git add empty-file.json
+  git config hooky.json-validator.defer-empty true
+  cp "$FIXTURE_ROOT/empty-file.json" "$TMP"
+  git add empty-file.json
+
   run git commit -m 'empty-file.json'
+
   assert_success
 }
 
 @test "json-validator: aborts commit for empty json in subdirectory (jq validator)" {
   configure_json_validator_jq
-  run mkdir -p "$TMP/a/b/c"
-  run cp "$FIXTURE_ROOT/empty-file.json" "$TMP"/a/b/c
-  run git add a/b/c/empty-file.json
+
+  mkdir -p "$TMP/a/b/c"
+  cp "$FIXTURE_ROOT/empty-file.json" "$TMP"/a/b/c
+  git add a/b/c/empty-file.json
+
   run git commit -m 'empty-file.json'
+
   assert_failure
+
   assert_output -p < "$FIXTURE_ROOT/header.txt"
   assert_output -p 'a/b/c/empty-file.json'
   assert_output -p < "$FIXTURE_ROOT/footer.txt"
@@ -187,20 +241,27 @@ configure_json_validator_jq() {
 
 @test "json-validator: succeeds for empty json in subdirectory with defer-empty=true (jq validator)" {
   configure_json_validator_jq
-  run git config hooky.json-validator.defer-empty true
-  run mkdir -p "$TMP/a/b/c"
-  run cp "$FIXTURE_ROOT/empty-file.json" "$TMP"/a/b/c
-  run git add a/b/c/empty-file.json
+
+  git config hooky.json-validator.defer-empty true
+  mkdir -p "$TMP/a/b/c"
+  cp "$FIXTURE_ROOT/empty-file.json" "$TMP"/a/b/c
+  git add a/b/c/empty-file.json
+
   run git commit -m 'empty-file.json'
+
   assert_success
 }
 
 @test "json-validator: aborts commit for invalid obj in file (jq validator)" {
   configure_json_validator_jq
-  run cp "$FIXTURE_ROOT/invalid-obj.json" "$TMP"
-  run git add invalid-obj.json
+
+  cp "$FIXTURE_ROOT/invalid-obj.json" "$TMP"
+  git add invalid-obj.json
+
   run git commit -m 'invalid-obj.json'
+
   assert_failure
+
   assert_output -p < "$FIXTURE_ROOT/header.txt"
   assert_output -p 'invalid-obj.json'
   assert_output -p < "$FIXTURE_ROOT/footer.txt"
@@ -208,11 +269,15 @@ configure_json_validator_jq() {
 
 @test "json-validator: aborts commit for invalid obj in file in subdirectory (jq validator)" {
   configure_json_validator_jq
-  run mkdir -p "$TMP/a/b/c"
-  run cp "$FIXTURE_ROOT/invalid-obj.json" "$TMP"/a/b/c
-  run git add a/b/c/invalid-obj.json
+
+  mkdir -p "$TMP/a/b/c"
+  cp "$FIXTURE_ROOT/invalid-obj.json" "$TMP"/a/b/c
+  git add a/b/c/invalid-obj.json
+
   run git commit -m 'invalid-obj.json'
+
   assert_failure
+
   assert_output -p < "$FIXTURE_ROOT/header.txt"
   assert_output -p 'a/b/c/invalid-obj.json'
   assert_output -p < "$FIXTURE_ROOT/footer.txt"
@@ -220,34 +285,46 @@ configure_json_validator_jq() {
 
 @test "json-validator: succeed for empty object (jq validator)" {
   configure_json_validator_jq
-  run cp "$FIXTURE_ROOT/empty-object.json" "$TMP"
-  run git add empty-object.json
+
+  cp "$FIXTURE_ROOT/empty-object.json" "$TMP"
+  git add empty-object.json
+
   run git commit -m 'empty-object.json'
+
   assert_success
 }
 
 @test "json-validator: succeed for empty object in subdirectory (jq validator)" {
   configure_json_validator_jq
-  run mkdir -p "$TMP/a/b/c"
-  run cp "$FIXTURE_ROOT/empty-object.json" "$TMP"/a/b/c
-  run git add a/b/c/empty-object.json
+
+  mkdir -p "$TMP/a/b/c"
+  cp "$FIXTURE_ROOT/empty-object.json" "$TMP"/a/b/c
+  git add a/b/c/empty-object.json
+
   run git commit -m 'empty-object.json'
+
   assert_success
 }
 
 @test "json-validator: succeed for valid object (jq validator)" {
   configure_json_validator_jq
-  run cp "$FIXTURE_ROOT/valid.json" "$TMP"
-  run git add valid.json
+
+  cp "$FIXTURE_ROOT/valid.json" "$TMP"
+  git add valid.json
+
   run git commit -m 'valid.json'
+
   assert_success
 }
 
 @test "json-validator: succeed for valid object in subdirectory (jq validator)" {
   configure_json_validator_jq
-  run mkdir -p "$TMP/a/b/c"
-  run cp "$FIXTURE_ROOT/valid.json" "$TMP"/a/b/c
-  run git add a/b/c/valid.json
+
+  mkdir -p "$TMP/a/b/c"
+  cp "$FIXTURE_ROOT/valid.json" "$TMP"/a/b/c
+  git add a/b/c/valid.json
+
   run git commit -m 'valid.json'
+
   assert_success
 }

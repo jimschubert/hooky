@@ -4,7 +4,7 @@
 # This always adds the branch name, and if set it also adds a branch description.
 
 # shellcheck source=/usr/local/Cellar/git/2.15.1/libexec/git-core/git-sh-setup
-. "$(git --exec-path)/git-sh-setup"
+[ "$(type -t git_dir_init)" = "function" ] ||  . "$(git --exec-path)/git-sh-setup"
 
 # If MERGE_MSG exists, we're in a merge commit so changes aren't from "our branch".
 [ -f "$GIT_DIR"/MERGE_MSG ] && exit 0

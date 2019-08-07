@@ -4,7 +4,7 @@
 # Modified from the stackoverflow answer here: http://stackoverflow.com/a/11524807/151445
 
 # shellcheck source=/usr/local/Cellar/git/2.15.1/libexec/git-core/git-sh-setup
-. "$(git --exec-path)/git-sh-setup"
+[ "$(type -t git_dir_init)" = "function" ] ||  . "$(git --exec-path)/git-sh-setup"
 
 # Succeed on all merge messages, as evidenced by MERGE_MSG existing
 [ -f "$GIT_DIR"/MERGE_MSG ] && exit 0
