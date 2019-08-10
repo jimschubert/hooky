@@ -116,6 +116,10 @@ Evaluates a branch name for common taskboard patterns, and appends a link to the
 |`hooky.taskboard.separator`
 |Defines the separator used between the board prefix and digits, e.g. `prefix`-`digits` or `prefix`/`digits`.
 |`-`
+
+|`hooky.taskboard.once`
+|Constrain the appended URL to occurring only once, up to the branch point. By default, appends on every commit.
+|`false`
 |===
 
 == Contributing

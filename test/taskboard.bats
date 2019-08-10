@@ -117,3 +117,41 @@ configure_taskboard_github() {
   # shellcheck disable=SC2002
   assert_output -p < "$FIXTURE_ROOT/pr-1.txt"
 }
+
+@test "taskboard: sets prefix and url only once when once option is true" {
+  configure_taskboard_standard
+
+  git config hooky.taskboard.once true
+
+  git checkout -b asdf-1234
+
+  echo "test" > testing
+  git add testing
+  git commit -m 'prefix and url'
+
+  run git log --format=%B  -1
+
+  assert_success
+
+  # shellcheck disable=SC2002
+  assert_output -p < "$FIXTURE_ROOT/prefix.txt"
+
+  echo "another" > testing
+  git add testing
+  git commit -m 'Another commit'
+
+  run git log --format=%B  -1
+  assert_output -p "Another commit"
+
+  echo "another" > another
+  git add another
+  git commit -m 'last commit'
+
+  run git log --format=%B  -1
+  assert_output -p "last commit"
+
+  git log --format=%B > "$TMP/log"
+
+  run grep -c 'http://example.com/asdf-1234' "$TMP/log"
+  assert_output -p "1"
+}

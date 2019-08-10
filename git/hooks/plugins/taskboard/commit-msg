@@ -4,7 +4,7 @@
 # Modified from the stackoverflow answer here: http://stackoverflow.com/a/11524807/151445
 
 # shellcheck source=/usr/local/Cellar/git/2.15.1/libexec/git-core/git-sh-setup
-[ "$(type -t git_dir_init)" = "function" ] ||  . "$(git --exec-path)/git-sh-setup"
+[ "$(type -t git_dir_init)" = "function" ] || . "$(git --exec-path)/git-sh-setup"
 
 # Succeed on all merge messages, as evidenced by MERGE_MSG existing
 [ -f "$GIT_DIR"/MERGE_MSG ] && exit 0
@@ -32,22 +32,46 @@ if [ "$name" != "(no branch)" ]; then
 
     # The url template is everything UP TO the issue's digits.
     # For SPARK-1234, url template will be https://issues.apache.org/jira/browse/SPARK-
-
     urltemplate=$(git config --get hooky.taskboard.urltemplate)
+
+    # defines separator (the - in SPARK-1234). Useful for github style (e.g. pr/1234).
     separator=$(git config --get hooky.taskboard.separator)
     separator=${separator:-"-"}
-    proj="$(echo "${taskboard}" | tr '[:upper:]' '[:lower:]' )[${separator}]?([0-9]*)$"
+
+    # if defined, make a "best guess" at whether we're in the first enabled commit on a given branch.
+    once=$(git config --get hooky.taskboard.once)
+    once=${once:-false}
+
+    # a regular expression used to determine issue-type structure
+    proj="$(echo "${taskboard}" | tr '[:upper:]' '[:lower:]')[${separator}]?([0-9]*)$"
     # proj="${taskboard}[-]?[//]?([0-9]*)$"
-     if [[ "$name" =~ $proj ]]; then
-        # shellcheck disable=SC2086
-        url=${urltemplate}$(echo "$name" | cut -d${separator} -f2)
+    if [[ "$name" =~ $proj ]]; then
+      # shellcheck disable=SC2086
+      url=${urltemplate}$(echo "$name" | cut -d${separator} -f2)
     fi
 
     d "$PLUGIN:\n\tTASKBOARD=${taskboard}\n\tURLTEMPLATE=${urltemplate}\n\tproj=${proj}\n\turl=${url}\n"
 
+    can_output=true
+    case "$once" in
+    "true" | "TRUE")
+      merge_base=$(git rev-list --simplify-by-decoration -2 HEAD | tail -1)
+      d "$PLUGIN: evaluating url exits only once in git log up to $merge_base"
+      # --exit-code exits with code 1 when there are differences and code 0 where there are not.
+      if ! git log --first-parent --no-color --exit-code --no-decorate --oneline --reverse --grep "${url}" "${merge_base}".."${name}" >/dev/null; then
+        can_output=false
+      fi
+      ;;
+    *)
+      if grep -q "$url" "$1"; then
+        can_output=false
+      fi
+      ;;
+    esac
+
     # Avoid writing this out multiple time, e.g. in the case of git commit --amend
     # shellcheck disable=SC2143
-    if [ -z "$(cat "$1" | grep "$url")" ]; then
+    if [ "true" = "$can_output" ]; then
       # Append url to COMMIT_MSG, adding an additional "empty line" if single-line commit message.
       if [ "$(tr -s '\n' <"$1" | grep -c "^[^#]")" -lt "2" ]; then
         printf '\n\n' >>"$1"
